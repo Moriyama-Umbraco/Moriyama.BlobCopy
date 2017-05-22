@@ -9,6 +9,8 @@ using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Moriyama.BlobCopy
 {
+    using System.Web;
+
     class Program
     {
         static void Main(string[] args)
@@ -99,6 +101,7 @@ namespace Moriyama.BlobCopy
                 stopWatch.Start();
                 using (var fileStream = System.IO.File.OpenRead(originalPath))
                 {
+                    blockBlob.Properties.ContentType = GetContentType(originalPath);
                     blockBlob.UploadFromStream(fileStream);
                 }
                 stopWatch.Stop();
@@ -113,6 +116,19 @@ namespace Moriyama.BlobCopy
 
                 Console.WriteLine("Uploaded " + path + " " + elapsedTime);
             }
+        }
+
+        /// <summary>
+        /// Gets the MIME type of the content.
+        /// </summary>
+        /// <param name="originalPath">The file path.</param>
+        /// <returns>The correct MIME type for the file.</returns>
+        private static string GetContentType(string filePath)
+        {
+            // If the path is empty there is no extension to return
+            if (string.IsNullOrEmpty(filePath)) return string.Empty;
+
+            return MimeMapping.GetMimeMapping(Path.GetFileName(filePath));
         }
     }
 }
